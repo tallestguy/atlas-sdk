@@ -1,37 +1,69 @@
 {
-    "name": "@your-org/atlas-cms-client",
-    "version": "1.0.0",
-    "description": "TypeScript client for Atlas CMS API",
+    "name": "@tallestguy/atlas-sdk",
+    "version": "0.1.0",
+    "description": "TypeScript SDK for Atlas CMS - A powerful content management system with AI capabilities",
     "main": "dist/index.js",
-    "module": "dist/index.esm.js",
     "types": "dist/index.d.ts",
+    "module": "dist/index.esm.js",
     "files": [
         "dist",
-        "README.md"
+        "README.md",
+        "LICENSE"
     ],
     "scripts": {
-        "build": "rollup -c",
-        "dev": "rollup -c -w",
+        "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run build:types",
+        "build:cjs": "tsc -p tsconfig.cjs.json",
+        "build:esm": "tsc -p tsconfig.esm.json",
+        "build:types": "tsc -p tsconfig.types.json",
+        "clean": "rm -rf dist",
         "test": "jest",
         "lint": "eslint src/**/*.ts",
-        "prepublishOnly": "npm run build"
+        "prepublishOnly": "npm run lint && npm run test && npm run build",
+        "version": "git add -A .",
+        "postversion": "git push && git push --tags"
     },
     "keywords": [
         "cms",
-        "content",
-        "api",
-        "client"
+        "atlas",
+        "content-management",
+        "api-client",
+        "sdk",
+        "typescript",
+        "supabase",
+        "ai"
     ],
-    "author": "Your Name",
+    "author": "Your Name <your.email@example.com>",
     "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/tallestguy/atlas-sdk.git"
+    },
+    "homepage": "https://github.com/tallestguy/atlas-sdk#readme",
+    "bugs": {
+        "url": "https://github.com/tallestguy/atlas-sdk/issues"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.49.4"
+    },
     "devDependencies": {
-        "@rollup/plugin-typescript": "^11.0.0",
-        "@types/jest": "^29.0.0",
-        "jest": "^29.0.0",
-        "rollup": "^3.0.0",
-        "typescript": "^5.0.0"
+        "@eslint/js": "^9.37.0",
+        "@types/jest": "^29.5.0",
+        "@types/node": "^20.0.0",
+        "@typescript-eslint/eslint-plugin": "^6.0.0",
+        "@typescript-eslint/parser": "^6.0.0",
+        "eslint": "^8.57.1",
+        "eslint-plugin-react": "^7.37.5",
+        "globals": "^16.4.0",
+        "jest": "^29.5.0",
+        "jiti": "^2.6.1",
+        "ts-jest": "^29.1.0",
+        "typescript": "^5.0.0",
+        "typescript-eslint": "^8.46.0"
     },
     "peerDependencies": {
         "typescript": ">=4.0.0"
+    },
+    "engines": {
+        "node": ">=16.0.0"
     }
 }

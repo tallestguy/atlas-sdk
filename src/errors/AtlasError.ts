@@ -11,15 +11,15 @@ export class AtlasError extends Error {
   ) {
     super(message);
     this.name = "AtlasError";
-    this.code = code;
-    this.statusCode = statusCode;
+    this.code = code ?? "UNKNOWN_ERROR";
+    this.statusCode = statusCode ?? 500;
     this.details = details;
   }
 }
 
 export class AtlasNetworkError extends AtlasError {
   constructor(message: string, details?: any) {
-    super(message, "NETWORK_ERROR", undefined, details);
+    super(message, "NETWORK_ERROR", 500, details);
     this.name = "AtlasNetworkError";
   }
 }
