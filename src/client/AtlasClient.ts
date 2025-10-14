@@ -5,14 +5,14 @@ import {
   PaginationOptions,
   ApiResponse,
 } from "../types";
-import { MemoryCache } from "../utils/cache";
-import { HttpClient } from "../utils/http";
+import { MemoryCache } from "../core/cache";
+import { HttpClient } from "../core/http";
 import {
   buildQueryParams,
   generateCacheKey,
   processPaginationOptions,
   enrichPaginationResponse,
-} from "../utils/query";
+} from "../utils";
 import { AtlasError, AtlasValidationError } from "../errors";
 
 export class AtlasClient {
