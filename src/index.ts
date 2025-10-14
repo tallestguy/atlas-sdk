@@ -1,7 +1,19 @@
+// src/index.ts
+// Export types
 export * from "./types";
+
+// Export errors
 export * from "./errors";
-export { createAtlasClient } from "./client";
+
+// Export core utilities
+export * from "./core";
+
+// Export services
+export * from "./services";
+
+// Export client
 export { AtlasClient } from "./client/AtlasClient";
+export { createAtlasClient, getAtlasClient, resetAtlasClient } from "./client";
 
 // Pre-configured singleton instance
 import { createAtlasClient } from "./client";

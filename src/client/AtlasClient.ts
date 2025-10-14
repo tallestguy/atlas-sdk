@@ -1,28 +1,24 @@
-import {
-  AtlasClientConfig,
-  ContentItem,
-  ContentQueryOptions,
-  PaginationOptions,
-  ApiResponse,
-} from "../types";
+// src/client/AtlasClient.ts
+import { AtlasClientConfig } from "../types/config";
 import { MemoryCache } from "../core/cache";
 import { HttpClient } from "../core/http";
-import {
-  buildQueryParams,
-  generateCacheKey,
-  processPaginationOptions,
-  enrichPaginationResponse,
-} from "../utils";
-import { AtlasError, AtlasValidationError } from "../errors";
+import { ContentService } from "../services/ContentService";
+import { PublicationService } from "../services/PublicationService";
+import { AtlasValidationError } from "../errors";
 
 export class AtlasClient {
   private config: AtlasClientConfig;
   private cache: MemoryCache;
   private http: HttpClient;
 
+  // Service instances - publicly accessible
+  public readonly content: ContentService;
+  public readonly publications: PublicationService;
+
   constructor(config: AtlasClientConfig) {
     this.validateConfig(config);
 
+    // Merge with defaults
     this.config = {
       timeout: 10000,
       cache: true,
@@ -32,6 +28,7 @@ export class AtlasClient {
       ...config,
     };
 
+    // Initialize core utilities
     this.cache = new MemoryCache();
     this.http = new HttpClient({
       timeout: this.config.timeout!,
@@ -39,92 +36,41 @@ export class AtlasClient {
       retryDelay: this.config.retryDelay!,
       headers: this.getDefaultHeaders(),
     });
+
+    // Initialize services with shared dependencies
+    this.content = new ContentService(this.config, this.cache, this.http);
+    this.publications = new PublicationService(
+      this.config,
+      this.cache,
+      this.http,
+    );
   }
 
-  // Main API methods
-  async getContent(
-    options: ContentQueryOptions = {},
-  ): Promise<ApiResponse<ContentItem[]>> {
-    const cacheKey = generateCacheKey("content", options);
-
-    if (this.config.cache) {
-      const cached = this.cache.get<ApiResponse<ContentItem[]>>(cacheKey);
-      if (cached) return cached;
-    }
-
-    // Process pagination options (handle page -> offset conversion)
-    const paginationInfo = processPaginationOptions(options);
-
-    const queryParams = buildQueryParams({
-      website_id: this.config.websiteId,
-      ...options,
-      limit: paginationInfo.limit,
-      offset: paginationInfo.offset,
-      // Remove page from query params since API uses offset
-      page: undefined,
-    });
-
-    try {
-      const response = (await this.http.get(
-        `${this.config.apiUrl}/content?${queryParams}`,
-      )) as ApiResponse<ContentItem[]>;
-
-      // Enrich response with complete pagination info
-      const enrichedResponse = enrichPaginationResponse(
-        response,
-        paginationInfo.limit,
-        paginationInfo.page,
-      );
-
-      if (this.config.cache) {
-        this.cache.set(cacheKey, enrichedResponse, this.config.cacheDuration!);
-      }
-
-      return enrichedResponse;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async getContentBySlug(
-    slug: string,
-  ): Promise<ApiResponse<ContentItem | null>> {
-    if (!slug) {
-      throw new AtlasValidationError("Slug is required");
-    }
-
-    const cacheKey = generateCacheKey("content-slug", { slug });
-
-    if (this.config.cache) {
-      const cached = this.cache.get<ApiResponse<ContentItem | null>>(cacheKey);
-      if (cached) return cached;
-    }
-
-    try {
-      const response = await this.http.get(
-        `${this.config.apiUrl}/content/slug/${slug}?website_id=${this.config.websiteId}`,
-      );
-
-      if (this.config.cache) {
-        this.cache.set(cacheKey, response, this.config.cacheDuration!);
-      }
-
-      return response;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  // Utility methods
+  /**
+   * Clear all cached data
+   */
   clearCache(): void {
     this.cache.clear();
   }
 
+  /**
+   * Update client configuration
+   * Note: This does not reinitialize services, only updates the config object
+   */
   updateConfig(newConfig: Partial<AtlasClientConfig>): void {
     this.config = { ...this.config, ...newConfig };
   }
 
-  // Private methods
+  /**
+   * Get current configuration
+   */
+  getConfig(): Readonly<AtlasClientConfig> {
+    return { ...this.config };
+  }
+
+  /**
+   * Validate configuration on initialization
+   */
   private validateConfig(config: AtlasClientConfig): void {
     if (!config.apiUrl) {
       throw new AtlasValidationError("apiUrl is required");
@@ -134,6 +80,9 @@ export class AtlasClient {
     }
   }
 
+  /**
+   * Get default headers for HTTP requests
+   */
   private getDefaultHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -144,64 +93,5 @@ export class AtlasClient {
     }
 
     return headers;
-  }
-
-  private handleError(error: any): AtlasError {
-    if (error instanceof AtlasError) {
-      return error;
-    }
-
-    return new AtlasError(
-      error.message || "An unknown error occurred",
-      "UNKNOWN_ERROR",
-    );
-  }
-
-  async getActivePublicationsByAgency(
-    agency: string,
-    options: PaginationOptions = {},
-  ): Promise<ApiResponse<ContentItem[]>> {
-    if (!agency) {
-      throw new AtlasValidationError("Agency is required");
-    }
-
-    const cacheKey = generateCacheKey("publications-agency", {
-      agency,
-      ...options,
-    });
-
-    if (this.config.cache) {
-      const cached = this.cache.get<ApiResponse<ContentItem[]>>(cacheKey);
-      if (cached) return cached;
-    }
-
-    // Process pagination options
-    const paginationInfo = processPaginationOptions(options);
-
-    const queryParams = buildQueryParams({
-      limit: paginationInfo.limit,
-      offset: paginationInfo.offset,
-    });
-
-    try {
-      const response = (await this.http.get(
-        `${this.config.apiUrl}/publications/active/agency/${agency}?${queryParams}`,
-      )) as ApiResponse<ContentItem[]>;
-
-      // Enrich response with complete pagination info
-      const enrichedResponse = enrichPaginationResponse(
-        response,
-        paginationInfo.limit,
-        paginationInfo.page,
-      );
-
-      if (this.config.cache) {
-        this.cache.set(cacheKey, enrichedResponse, this.config.cacheDuration!);
-      }
-
-      return enrichedResponse;
-    } catch (error) {
-      throw this.handleError(error);
-    }
   }
 }
