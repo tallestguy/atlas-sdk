@@ -387,7 +387,7 @@ export class PeopleService {
   async uploadFile(
     personId: string,
     file: File,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     if (!personId) {
       throw new AtlasValidationError("Person ID is required");
     }
@@ -414,7 +414,7 @@ export class PeopleService {
   /**
    * Get files for a person
    */
-  async getFiles(personId: string): Promise<ApiResponse<any[]>> {
+  async getFiles(personId: string): Promise<ApiResponse<unknown[]>> {
     if (!personId) {
       throw new AtlasValidationError("Person ID is required");
     }
@@ -514,15 +514,16 @@ export class PeopleService {
     }
   }
 
-  private handleError(error: any): AtlasError {
+  private handleError(error: unknown): AtlasError {
     if (error instanceof AtlasError) {
       return error;
     }
 
-    return new AtlasError(
-      error.message || "An unknown error occurred",
-      "UNKNOWN_ERROR",
-    );
+    if (error instanceof Error) {
+      return new AtlasError(error.message, "UNKNOWN_ERROR");
+    }
+
+    return new AtlasError("An unknown error occurred", "UNKNOWN_ERROR");
   }
 }
 

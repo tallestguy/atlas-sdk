@@ -233,14 +233,15 @@ export class ContentService {
   }
 
   // Private helper method
-  private handleError(error: any): AtlasError {
+  private handleError(error: unknown): AtlasError {
     if (error instanceof AtlasError) {
       return error;
     }
 
-    return new AtlasError(
-      error.message || "An unknown error occurred",
-      "UNKNOWN_ERROR",
-    );
+    if (error instanceof Error) {
+      return new AtlasError(error.message, "UNKNOWN_ERROR");
+    }
+
+    return new AtlasError("An unknown error occurred", "UNKNOWN_ERROR");
   }
 }

@@ -5,7 +5,7 @@ interface CacheItem<T> {
 }
 
 export class MemoryCache {
-  private cache: Map<string, CacheItem<any>> = new Map();
+  private cache: Map<string, CacheItem<unknown>> = new Map();
 
   get<T>(key: string): T | null {
     const item = this.cache.get(key);
@@ -16,7 +16,7 @@ export class MemoryCache {
       return null;
     }
 
-    return item.data;
+    return item.data as T;
   }
 
   set<T>(key: string, data: T, ttlMinutes: number): void {

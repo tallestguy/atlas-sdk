@@ -17,5 +17,5 @@ export interface ApiErrorResponse {
   success: false;
   error: string;
   code?: string;
-  details?: any;
+  details?: unknown;
 }

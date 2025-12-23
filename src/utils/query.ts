@@ -1,15 +1,15 @@
 import { PaginationOptions } from "../types/content";
 import { ApiResponse } from "../types/api";
 
-export function buildQueryParams(params: Record<string, any>): string {
+export function buildQueryParams(params: Record<string, unknown> | object): string {
   const searchParams = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       if (Array.isArray(value)) {
-        value.forEach((item) => searchParams.append(key, item.toString()));
+        value.forEach((item) => searchParams.append(key, String(item)));
       } else {
-        searchParams.append(key, value.toString());
+        searchParams.append(key, String(value));
       }
     }
   });
@@ -17,7 +17,7 @@ export function buildQueryParams(params: Record<string, any>): string {
   return searchParams.toString();
 }
 
-export function generateCacheKey(prefix: string, params: any): string {
+export function generateCacheKey(prefix: string, params: unknown): string {
   return `${prefix}:${JSON.stringify(params)}`;
 }
 

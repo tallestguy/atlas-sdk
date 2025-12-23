@@ -6,7 +6,7 @@ import { PaginationOptions } from "./content";
 export interface Location {
   id?: string;
   carerix_id: string;
-  carerix_data?: Record<string, any>;
+  carerix_data?: Record<string, unknown>;
 
   // Basic information
   name: string;

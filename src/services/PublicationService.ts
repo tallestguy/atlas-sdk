@@ -49,7 +49,7 @@ export class PublicationService {
    */
   async bulkCreate(
     publications: Omit<Publication, "id" | "created_at" | "updated_at">[],
-  ): Promise<ApiResponse<{ created: number; failed: number; errors?: any[] }>> {
+  ): Promise<ApiResponse<{ created: number; failed: number; errors?: unknown[] }>> {
     try {
       const response = await this.http.post(
         `${this.config.apiUrl}/publications/bulk`,
@@ -481,7 +481,7 @@ export class PublicationService {
    * DELETE /publications/cleanup/expired - Cleanup expired publications
    */
   async cleanupExpired(): Promise<
-    ApiResponse<{ deleted: number; errors?: any[] }>
+    ApiResponse<{ deleted: number; errors?: unknown[] }>
   > {
     try {
       const response = await this.http.delete(
@@ -498,7 +498,7 @@ export class PublicationService {
   /**
    * GET /publications/:id/carerix-format - Transform publication to Carerix format
    */
-  async transformToCarerixFormat(id: string): Promise<ApiResponse<any>> {
+  async transformToCarerixFormat(id: string): Promise<ApiResponse<Record<string, unknown>>> {
     if (!id) {
       throw new AtlasValidationError("Publication ID is required");
     }
@@ -517,14 +517,15 @@ export class PublicationService {
   /**
    * Private helper method to handle errors consistently
    */
-  private handleError(error: any): AtlasError {
+  private handleError(error: unknown): AtlasError {
     if (error instanceof AtlasError) {
       return error;
     }
 
-    return new AtlasError(
-      error.message || "An unknown error occurred",
-      "UNKNOWN_ERROR",
-    );
+    if (error instanceof Error) {
+      return new AtlasError(error.message, "UNKNOWN_ERROR");
+    }
+
+    return new AtlasError("An unknown error occurred", "UNKNOWN_ERROR");
   }
 }

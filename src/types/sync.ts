@@ -36,7 +36,7 @@ export interface SyncJob {
 
   // Error tracking
   errors?: string[];
-  error_details?: Record<string, any>[];
+  error_details?: Record<string, unknown>[];
 
   // Metadata
   created_at?: Date | string;
@@ -46,7 +46,7 @@ export interface SyncJob {
 export interface SyncTriggerOptions {
   force?: boolean;
   dry_run?: boolean;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
 }
 
 export interface SyncJobDetails extends SyncJob {

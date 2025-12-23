@@ -167,8 +167,8 @@ export class WebsiteService {
    */
   async getContent(
     websiteId: string,
-    options: any = {},
-  ): Promise<ApiResponse<any[]>> {
+    options: Record<string, unknown> = {},
+  ): Promise<ApiResponse<unknown[]>> {
     if (!websiteId) {
       throw new AtlasValidationError("Website ID is required");
     }
@@ -179,7 +179,7 @@ export class WebsiteService {
     });
 
     if (this.config.cache) {
-      const cached = this.cache.get<ApiResponse<any[]>>(cacheKey);
+      const cached = this.cache.get<ApiResponse<unknown[]>>(cacheKey);
       if (cached) return cached;
     }
 
@@ -194,7 +194,7 @@ export class WebsiteService {
     try {
       const response = (await this.http.get(
         `${this.config.apiUrl}/website/${websiteId}/content?${queryParams}`,
-      )) as ApiResponse<any[]>;
+      )) as ApiResponse<unknown[]>;
 
       const enrichedResponse = enrichPaginationResponse(
         response,
@@ -366,15 +366,16 @@ export class WebsiteService {
     }
   }
 
-  private handleError(error: any): AtlasError {
+  private handleError(error: unknown): AtlasError {
     if (error instanceof AtlasError) {
       return error;
     }
 
-    return new AtlasError(
-      error.message || "An unknown error occurred",
-      "UNKNOWN_ERROR",
-    );
+    if (error instanceof Error) {
+      return new AtlasError(error.message, "UNKNOWN_ERROR");
+    }
+
+    return new AtlasError("An unknown error occurred", "UNKNOWN_ERROR");
   }
 }
 

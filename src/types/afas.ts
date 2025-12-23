@@ -20,7 +20,7 @@ export interface AFASEmployee {
   sync_status?: "pending" | "completed" | "failed";
 
   // Raw AFAS data
-  afas_data?: Record<string, any>;
+  afas_data?: Record<string, unknown>;
 
   // Metadata
   created_at?: string;
@@ -53,7 +53,7 @@ export interface AFASTimeEntry {
   sync_status?: "pending" | "completed" | "failed";
 
   // Raw AFAS data
-  afas_data?: Record<string, any>;
+  afas_data?: Record<string, unknown>;
 
   // Metadata
   created_at?: string;

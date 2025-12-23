@@ -50,7 +50,9 @@ export class LocationService {
    */
   async bulkCreate(
     locations: Omit<Location, "id" | "created_at" | "updated_at">[]
-  ): Promise<ApiResponse<{ created: number; failed: number; errors?: any[] }>> {
+  ): Promise<
+    ApiResponse<{ created: number; failed: number; errors?: unknown[] }>
+  > {
     try {
       const response = await this.http.post(
         `${this.config.apiUrl}/locations/bulk`,
@@ -612,7 +614,7 @@ export class LocationService {
    * Cleanup inactive locations
    */
   async cleanupInactive(): Promise<
-    ApiResponse<{ deleted: number; errors?: any[] }>
+    ApiResponse<{ deleted: number; errors?: unknown[] }>
   > {
     try {
       const response = await this.http.delete(
@@ -629,7 +631,10 @@ export class LocationService {
   /**
    * Upload file for a location
    */
-  async uploadFile(locationId: string, file: File): Promise<ApiResponse<any>> {
+  async uploadFile(
+    locationId: string,
+    file: File
+  ): Promise<ApiResponse<unknown>> {
     if (!locationId) {
       throw new AtlasValidationError("Location ID is required");
     }
@@ -656,7 +661,7 @@ export class LocationService {
   /**
    * Get files for a location
    */
-  async getFiles(locationId: string): Promise<ApiResponse<any[]>> {
+  async getFiles(locationId: string): Promise<ApiResponse<unknown[]>> {
     if (!locationId) {
       throw new AtlasValidationError("Location ID is required");
     }
@@ -727,14 +732,15 @@ export class LocationService {
     }
   }
 
-  private handleError(error: any): AtlasError {
+  private handleError(error: unknown): AtlasError {
     if (error instanceof AtlasError) {
       return error;
     }
 
-    return new AtlasError(
-      error.message || "An unknown error occurred",
-      "UNKNOWN_ERROR"
-    );
+    if (error instanceof Error) {
+      return new AtlasError(error.message, "UNKNOWN_ERROR");
+    }
+
+    return new AtlasError("An unknown error occurred", "UNKNOWN_ERROR");
   }
 }

@@ -14,24 +14,24 @@ export class HttpClient {
     this.options = options;
   }
 
-  async get(url: string, headers: Record<string, string> = {}): Promise<any> {
+  async get(url: string, headers: Record<string, string> = {}): Promise<unknown> {
     return this.request(url, "GET", undefined, headers);
   }
 
   async post(
     url: string,
-    data?: any,
+    data?: unknown,
     headers: Record<string, string> = {},
-  ): Promise<any> {
+  ): Promise<unknown> {
     return this.request(url, "POST", data, headers);
   }
 
   private async request(
     url: string,
     method: string,
-    data?: any,
+    data?: unknown,
     customHeaders: Record<string, string> = {},
-  ): Promise<any> {
+  ): Promise<unknown> {
     const headers = { ...this.options.headers, ...customHeaders };
 
     for (let attempt = 0; attempt <= this.options.retries; attempt++) {

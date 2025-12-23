@@ -1,13 +1,13 @@
 export class AtlasError extends Error {
   public code?: string;
   public statusCode?: number;
-  public details?: any;
+  public details?: unknown;
 
   constructor(
     message: string,
     code?: string,
     statusCode?: number,
-    details?: any,
+    details?: unknown,
   ) {
     super(message);
     this.name = "AtlasError";
@@ -18,14 +18,14 @@ export class AtlasError extends Error {
 }
 
 export class AtlasNetworkError extends AtlasError {
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: unknown) {
     super(message, "NETWORK_ERROR", 500, details);
     this.name = "AtlasNetworkError";
   }
 }
 
 export class AtlasValidationError extends AtlasError {
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: unknown) {
     super(message, "VALIDATION_ERROR", 400, details);
     this.name = "AtlasValidationError";
   }
