@@ -42,6 +42,25 @@ export class HttpClient {
     return this.request(url, "DELETE", undefined, headers);
   }
 
+  async postFormData(
+    url: string,
+    formData: FormData,
+    headers: Record<string, string> = {},
+  ): Promise<any> {
+    // Don't include Content-Type header for FormData - browser will set it with boundary
+    const formHeaders = { ...this.options.headers, ...headers };
+    delete formHeaders["Content-Type"];
+    return this.requestFormData(url, "POST", formData, formHeaders);
+  }
+
+  async patch(
+    url: string,
+    data?: any,
+    headers: Record<string, string> = {},
+  ): Promise<any> {
+    return this.request(url, "PATCH", data, headers);
+  }
+
   private async request(
     url: string,
     method: string,
@@ -62,6 +81,47 @@ export class HttpClient {
           method,
           headers,
           body: data ? JSON.stringify(data) : undefined,
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new AtlasNetworkError(
+            `HTTP ${response.status}: ${response.statusText}`,
+          );
+        }
+
+        return await response.json();
+      } catch (error) {
+        if (attempt === this.options.retries) {
+          throw error;
+        }
+        await this.delay(this.options.retryDelay * Math.pow(2, attempt));
+      }
+    }
+  }
+
+  private async requestFormData(
+    url: string,
+    method: string,
+    formData: FormData,
+    customHeaders: Record<string, string> = {},
+  ): Promise<any> {
+    const headers = { ...customHeaders };
+
+    for (let attempt = 0; attempt <= this.options.retries; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(
+          () => controller.abort(),
+          this.options.timeout,
+        );
+
+        const response = await fetch(url, {
+          method,
+          headers,
+          body: formData,
           signal: controller.signal,
         });
 

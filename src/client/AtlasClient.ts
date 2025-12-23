@@ -4,6 +4,16 @@ import { MemoryCache } from "../core/cache";
 import { HttpClient } from "../core/http";
 import { ContentService } from "../services/ContentService";
 import { PublicationService } from "../services/PublicationService";
+import { WebsiteService } from "../services/WebsiteService";
+import { PeopleService } from "../services/PeopleService";
+import { LocationService } from "../services/LocationService";
+import { AuthService } from "../services/AuthService";
+import { DeploymentService } from "../services/DeploymentService";
+import { SyncService } from "../services/SyncService";
+import { AFASService } from "../services/AFASService";
+import { TimeEntriesService } from "../services/TimeEntriesService";
+import { FileAttachmentService } from "../services/FileAttachmentService";
+import { SchedulerService } from "../services/SchedulerService";
 import { AtlasValidationError } from "../errors";
 
 export class AtlasClient {
@@ -14,6 +24,16 @@ export class AtlasClient {
   // Service instances - publicly accessible
   public readonly content: ContentService;
   public readonly publications: PublicationService;
+  public readonly websites: WebsiteService;
+  public readonly people: PeopleService;
+  public readonly locations: LocationService;
+  public readonly auth: AuthService;
+  public readonly deployments: DeploymentService;
+  public readonly sync: SyncService;
+  public readonly afas: AFASService;
+  public readonly timeEntries: TimeEntriesService;
+  public readonly files: FileAttachmentService;
+  public readonly scheduler: SchedulerService;
 
   constructor(config: AtlasClientConfig) {
     this.validateConfig(config);
@@ -44,6 +64,24 @@ export class AtlasClient {
       this.cache,
       this.http,
     );
+    this.websites = new WebsiteService(this.config, this.cache, this.http);
+    this.people = new PeopleService(this.config, this.cache, this.http);
+    this.locations = new LocationService(this.config, this.cache, this.http);
+    this.auth = new AuthService(this.config, this.cache, this.http);
+    this.deployments = new DeploymentService(
+      this.config,
+      this.cache,
+      this.http,
+    );
+    this.sync = new SyncService(this.config, this.cache, this.http);
+    this.afas = new AFASService(this.config, this.cache, this.http);
+    this.timeEntries = new TimeEntriesService(
+      this.config,
+      this.cache,
+      this.http,
+    );
+    this.files = new FileAttachmentService(this.config, this.cache, this.http);
+    this.scheduler = new SchedulerService(this.config, this.cache, this.http);
   }
 
   /**
