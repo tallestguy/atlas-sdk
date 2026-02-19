@@ -14,6 +14,9 @@ import { AFASService } from "../services/AFASService";
 import { TimeEntriesService } from "../services/TimeEntriesService";
 import { FileAttachmentService } from "../services/FileAttachmentService";
 import { SchedulerService } from "../services/SchedulerService";
+import { MeetingService } from "../services/MeetingService";
+import { TrainingService } from "../services/TrainingService";
+import { PublicService } from "../services/PublicService";
 import { AtlasValidationError } from "../errors";
 
 export class AtlasClient {
@@ -34,6 +37,9 @@ export class AtlasClient {
   public readonly timeEntries: TimeEntriesService;
   public readonly files: FileAttachmentService;
   public readonly scheduler: SchedulerService;
+  public readonly meetings: MeetingService;
+  public readonly trainings: TrainingService;
+  public readonly public: PublicService;
 
   constructor(config: AtlasClientConfig) {
     this.validateConfig(config);
@@ -82,6 +88,9 @@ export class AtlasClient {
     );
     this.files = new FileAttachmentService(this.config, this.cache, this.http);
     this.scheduler = new SchedulerService(this.config, this.cache, this.http);
+    this.meetings = new MeetingService(this.config, this.cache, this.http);
+    this.trainings = new TrainingService(this.config, this.cache, this.http);
+    this.public = new PublicService(this.config, this.cache, this.http);
   }
 
   /**

@@ -12,3 +12,5 @@ export * from "./sync";
 export * from "./afas";
 export * from "./timeEntries";
 export * from "./scheduler";
+export * from "./meeting";
+export * from "./training";

@@ -10,3 +10,6 @@ export * from "./AFASService";
 export * from "./TimeEntriesService";
 export * from "./FileAttachmentService";
 export * from "./SchedulerService";
+export * from "./MeetingService";
+export * from "./TrainingService";
+export * from "./PublicService";

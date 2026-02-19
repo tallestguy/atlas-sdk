@@ -112,6 +112,9 @@ atlas.afas             // AFAS employee & time sync
 atlas.timeEntries      // Time entry statistics
 atlas.files            // File attachment management
 atlas.scheduler        // Job scheduling
+atlas.meetings         // Meeting management
+atlas.trainings        // Training management
+atlas.public           // Public API (no auth required)
 ```
 
 ### Content Management
@@ -544,6 +547,140 @@ const summary = await atlas.timeEntries.getSummary({
 });
 ```
 
+### Meeting Management
+
+```typescript
+const atlas = new AtlasClient(config);
+
+// Meetings
+const meetings = await atlas.meetings.list({ status: "scheduled", limit: 10 });
+const meeting = await atlas.meetings.getById("meeting-id");
+const created = await atlas.meetings.create({ 
+  title: "Q2 Planning", 
+  scheduled_at: "2026-04-01T10:00:00Z" 
+});
+await atlas.meetings.update("meeting-id", { location: "Room 4.01" });
+await atlas.meetings.cancel("meeting-id");
+await atlas.meetings.complete("meeting-id");
+const copied = await atlas.meetings.copy("meeting-id", { 
+  scheduled_at: "2026-05-01T10:00:00Z" 
+});
+await atlas.meetings.generateAgendaPdf("meeting-id");
+
+// Participants
+const participants = await atlas.meetings.getParticipants("meeting-id");
+await atlas.meetings.addParticipant("meeting-id", { 
+  person_id: "person-uuid", 
+  role: "required" 
+});
+await atlas.meetings.addParticipantByEmail("meeting-id", { 
+  email: "jan@example.com", 
+  firstname: "Jan", 
+  lastname: "Bakker" 
+});
+await atlas.meetings.removeParticipant("meeting-id", "person-uuid");
+
+// Agenda Items
+const items = await atlas.meetings.getAgendaItems("meeting-id");
+await atlas.meetings.updateAgendaItem("item-id", { 
+  status: "accepted", 
+  position: 1 
+});
+await atlas.meetings.acceptAgendaItem("item-id");
+await atlas.meetings.removeAgendaItem("item-id");
+await atlas.meetings.reorderAgendaItems("meeting-id", { 
+  item_ids: ["id1", "id2", "id3"] 
+});
+```
+
+### Training Management
+
+```typescript
+// Trainings
+const trainings = await atlas.trainings.list({ 
+  is_active: true, 
+  name: "verslaving" 
+});
+const training = await atlas.trainings.getById("training-id");
+
+// Create with existing trainer
+const t1 = await atlas.trainings.create({ 
+  title: "MI Basis", 
+  trainer_id: "person-uuid", 
+  points: 3 
+});
+
+// Create with find-or-create by email
+const t2 = await atlas.trainings.create({
+  title: "MI Verdieping",
+  trainer_email: "ed@brijder.nl",
+  trainer_firstname: "Ed",
+  trainer_lastname: "Bakker",
+  trainer_organisation: "Brijder",
+  points: 5
+});
+
+await atlas.trainings.update("training-id", { points: 4 });
+await atlas.trainings.deactivate("training-id");
+
+// Sessions
+const sessions = await atlas.trainings.getSessions("training-id", { 
+  status: "planned" 
+});
+await atlas.trainings.createSession("training-id", {
+  start_date: "2026-05-15T10:00:00Z",
+  end_date: "2026-05-15T13:30:00Z",
+  location: "Gedempte Oude Gracht, Haarlem",
+  region: "Haarlem",
+  max_participants: 20
+});
+await atlas.trainings.updateSession("session-id", { 
+  published: true, 
+  status: "confirmed" 
+});
+await atlas.trainings.deleteSession("session-id");
+```
+
+### Public API
+
+```typescript
+// Public endpoints (no authentication required)
+
+// Content
+const content = await atlas.public.getContent("content-id");
+const bySlug = await atlas.public.getContentBySlug("getting-started");
+
+// Locations
+const locations = await atlas.public.getLocations({ limit: 20 });
+const location = await atlas.public.getLocation("location-id");
+const byAgency = await atlas.public.getLocationsByAgency("Tamarinde");
+
+// People
+const people = await atlas.public.getPeople();
+const person = await atlas.public.getPerson("person-id");
+const teamMembers = await atlas.public.getPeopleByWebsite("website-id");
+
+// Websites
+const websites = await atlas.public.getWebsites();
+const website = await atlas.public.getWebsite("website-id");
+
+// Publications
+const publications = await atlas.public.getPublications({ limit: 50 });
+const publication = await atlas.public.getPublication("publication-id");
+const agencyPubs = await atlas.public.getPublicationsByAgency("TechCorp");
+
+// Meeting agenda submission (token-based)
+const context = await atlas.public.getSubmissionContext("participant-token");
+await atlas.public.submitAgendaItem("participant-token", {
+  topic: "Budget review",
+  goal_type: "decision",
+  estimated_minutes: 15
+});
+
+// Trainings (public view)
+const publicTrainings = await atlas.public.getTrainings({ region: "Haarlem" });
+```
+
 ### File Management
 
 ```typescript
@@ -595,6 +732,65 @@ console.log(health.data.status); // "healthy" | "degraded" | "unhealthy"
 const result = await atlas.scheduler.triggerJob("sync-locations");
 console.log(result.data.success);
 ```
+
+## API Endpoints Reference
+
+### Meetings
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/meetings` | Create meeting |
+| GET | `/meetings` | List meetings |
+| GET | `/meetings/:id` | Get meeting detail |
+| PATCH | `/meetings/:id` | Update meeting |
+| POST | `/meetings/:id/cancel` | Cancel meeting |
+| POST | `/meetings/:id/complete` | Complete meeting |
+| POST | `/meetings/:id/copy` | Copy meeting |
+| POST | `/meetings/:id/agenda-pdf` | Generate agenda PDF |
+| GET | `/meetings/:id/participants` | List participants |
+| POST | `/meetings/:id/participants` | Add participant |
+| POST | `/meetings/:id/participants/by-email` | Add participant by email |
+| DELETE | `/meetings/:id/participants/:personId` | Remove participant |
+| GET | `/meetings/:id/agenda-items` | List agenda items |
+| PATCH | `/meetings/agenda-items/:itemId` | Update agenda item |
+| POST | `/meetings/agenda-items/:itemId/accept` | Accept agenda item |
+| DELETE | `/meetings/agenda-items/:itemId` | Remove agenda item |
+| PUT | `/meetings/:id/agenda-items/reorder` | Reorder agenda items |
+
+### Trainings
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/trainings` | Create training |
+| GET | `/trainings` | List trainings |
+| GET | `/trainings/:id` | Get training detail |
+| PATCH | `/trainings/:id` | Update training |
+| POST | `/trainings/:id/deactivate` | Deactivate training |
+| POST | `/trainings/:trainingId/sessions` | Create session |
+| GET | `/trainings/:trainingId/sessions` | List sessions |
+| PATCH | `/trainings/sessions/:id` | Update session |
+| DELETE | `/trainings/sessions/:id` | Delete session |
+
+### Public
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/public/content/:id` | No | Get content by ID |
+| GET | `/public/content/slug/:slug` | No | Get content by slug |
+| GET | `/public/locations` | No | List active locations |
+| GET | `/public/locations/:id` | No | Get location |
+| GET | `/public/locations/agency/:name` | No | Locations by agency |
+| GET | `/public/people` | No | List people |
+| GET | `/public/people/:id` | No | Get person |
+| GET | `/public/people/website/:id` | No | People by website |
+| GET | `/public/websites` | No | List active websites |
+| GET | `/public/websites/:id` | No | Get website |
+| GET | `/public/publications` | No | List publications |
+| GET | `/public/publications/:id` | No | Get publication |
+| GET | `/public/publications/agency/:name` | No | Publications by agency |
+| GET | `/public/meetings/agenda/:token` | No | Agenda submission context |
+| POST | `/public/meetings/agenda/:token` | No | Submit agenda item |
+| GET | `/public/trainings` | No | Published trainings |
 
 ## Advanced Usage
 
@@ -651,7 +847,15 @@ import type {
   Deployment,
   Website,
   AFASEmployee,
-  AFASTimeEntry
+  AFASTimeEntry,
+  MeetingSummary,
+  MeetingDetail,
+  Participant,
+  AgendaItem,
+  TrainingSummary,
+  TrainingDetail,
+  TrainingSession,
+  PublicTraining
 } from '@tallestguy/atlas-sdk';
 
 // Full autocompletion and type checking
