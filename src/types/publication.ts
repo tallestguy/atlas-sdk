@@ -42,6 +42,7 @@ export interface PublicationQueryOptions extends PaginationOptions {
   start_date_from?: string;
   start_date_to?: string;
   end_date_from?: string;
+  end_date_from_or_null?: string;
   end_date_to?: string;
   salary_min?: number;
   salary_max?: number;

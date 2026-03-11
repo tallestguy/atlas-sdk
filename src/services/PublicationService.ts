@@ -2,7 +2,6 @@
 import {
   AtlasClientConfig,
   ApiResponse,
-  PaginationOptions,
   Publication,
   PublicationQueryOptions,
   PublicationStatistics,
@@ -128,7 +127,7 @@ export class PublicationService {
    */
   async getByCarerixLocationId(
     carerixLocationId: string,
-    options: PaginationOptions = {},
+    options: PublicationQueryOptions = {},
   ): Promise<ApiResponse<Publication[]>> {
     if (!carerixLocationId) {
       throw new AtlasValidationError("Carerix location ID is required");
@@ -146,8 +145,10 @@ export class PublicationService {
 
     const paginationInfo = processPaginationOptions(options);
     const queryParams = buildQueryParams({
+      ...options,
       limit: paginationInfo.limit,
       offset: paginationInfo.offset,
+      page: undefined,
     });
 
     try {
@@ -265,7 +266,7 @@ export class PublicationService {
    * GET /publications/active - Get all active publications
    */
   async getActive(
-    options: PaginationOptions = {},
+    options: PublicationQueryOptions = {},
   ): Promise<ApiResponse<Publication[]>> {
     const cacheKey = generateCacheKey("publications-active", options);
 
@@ -276,8 +277,10 @@ export class PublicationService {
 
     const paginationInfo = processPaginationOptions(options);
     const queryParams = buildQueryParams({
+      ...options,
       limit: paginationInfo.limit,
       offset: paginationInfo.offset,
+      page: undefined,
     });
 
     try {
@@ -306,7 +309,7 @@ export class PublicationService {
    */
   async getActiveByAgency(
     agency: string,
-    options: PaginationOptions = {},
+    options: PublicationQueryOptions = {},
   ): Promise<ApiResponse<Publication[]>> {
     if (!agency) {
       throw new AtlasValidationError("Agency is required");
@@ -324,8 +327,10 @@ export class PublicationService {
 
     const paginationInfo = processPaginationOptions(options);
     const queryParams = buildQueryParams({
+      ...options,
       limit: paginationInfo.limit,
       offset: paginationInfo.offset,
+      page: undefined,
     });
 
     try {
@@ -353,7 +358,7 @@ export class PublicationService {
    * GET /publications/expired - Get expired publications
    */
   async getExpired(
-    options: PaginationOptions = {},
+    options: PublicationQueryOptions = {},
   ): Promise<ApiResponse<Publication[]>> {
     const cacheKey = generateCacheKey("publications-expired", options);
 
@@ -364,8 +369,10 @@ export class PublicationService {
 
     const paginationInfo = processPaginationOptions(options);
     const queryParams = buildQueryParams({
+      ...options,
       limit: paginationInfo.limit,
       offset: paginationInfo.offset,
+      page: undefined,
     });
 
     try {
@@ -395,7 +402,7 @@ export class PublicationService {
    * GET /publications/stale - Get stale publications
    */
   async getStale(
-    options: PaginationOptions = {},
+    options: PublicationQueryOptions = {},
   ): Promise<ApiResponse<Publication[]>> {
     const cacheKey = generateCacheKey("publications-stale", options);
 
@@ -406,8 +413,10 @@ export class PublicationService {
 
     const paginationInfo = processPaginationOptions(options);
     const queryParams = buildQueryParams({
+      ...options,
       limit: paginationInfo.limit,
       offset: paginationInfo.offset,
+      page: undefined,
     });
 
     try {
